@@ -84,7 +84,7 @@ app.get("/profile", auth, (req, res) => {
   res.send(req.user);
 });
 
-app.get("/", auth, (req, res) => {
+app.get("/", (req, res) => {
   res.json("test");
 });
 
