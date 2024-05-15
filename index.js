@@ -84,6 +84,10 @@ app.get("/profile", auth, (req, res) => {
   res.send(req.user);
 });
 
+app.get("/", auth, (req, res) => {
+  res.json("test");
+});
+
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
 });
