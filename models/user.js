@@ -2,14 +2,10 @@ const mongoose = require("mongoose");
 
 const userSchema = new mongoose.Schema({
   name: { type: String, required: true },
-  email: { type: String, required: true },
+  email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
-  sessions: [
-    {
-      loginTime: { type: Date, default: Date.now },
-      logoutTime: Date,
-    },
-  ],
+  role: { type: String, default: "employee" },
+  sessions: [{ loginTime: Date, logoutTime: Date }],
 });
 
 const User = mongoose.model("User", userSchema);

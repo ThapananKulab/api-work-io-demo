@@ -10,17 +10,12 @@ const app = express();
 const port = 3000;
 const secret = "fullstack";
 
-// Middleware to parse JSON
 app.use(cors());
 app.use(express.json());
 
 // Connect to MongoDB
 mongoose.connect(
-  "mongodb+srv://nicekrubma123:kulab12345@atlascluster.rieucoy.mongodb.net/",
-  {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  }
+  "mongodb+srv://nicekrubma123:kulab12345@atlascluster.rieucoy.mongodb.net"
 );
 
 const db = mongoose.connection;
@@ -29,16 +24,28 @@ db.once("open", () => {
   console.log("Connected to MongoDB");
 });
 
-// User registration
 app.post("/register", async (req, res) => {
-  const { name, email, password } = req.body;
   try {
+    const { name, email, password, role } = req.body;
+
+    // Check if user already exists
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ message: "User already exists" });
+    }
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = new User({ name, email, password: hashedPassword });
+    const newUser = new User({
+      name,
+      email,
+      password: hashedPassword,
+      role: role || "พนักงาน",
+    });
+
     await newUser.save();
-    res.status(201).send("User registered successfully");
+    res.status(201).json({ message: "User registered successfully" });
   } catch (error) {
-    res.status(400).send(error.message);
+    console.error("Error registering user:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 
@@ -77,6 +84,15 @@ app.post("/logout", auth, async (req, res) => {
     res.send("User logged out successfully");
   } catch (error) {
     res.status(500).send(error.message);
+  }
+});
+
+app.get("/api/users", async (req, res) => {
+  try {
+    const users = await User.find();
+    res.json(users);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 });
 
