@@ -60,12 +60,19 @@ app.post("/login", async (req, res) => {
     if (!isMatch) {
       return res.status(400).send("Invalid email or password");
     }
+
+    // Payload ที่มีข้อมูลเพิ่มเติม เช่น role
+    const payload = {
+      id: user._id,
+      role: user.role, // เพิ่ม role จากข้อมูลของผู้ใช้
+    };
+
     // Record login time
     const session = { loginTime: new Date() };
     user.sessions.push(session);
     await user.save();
 
-    const token = jwt.sign({ id: user._id }, secret, { expiresIn: "1h" });
+    const token = jwt.sign(payload, secret, { expiresIn: "1h" }); // ใช้ payload ในการสร้าง token
     res.status(200).json({ token });
   } catch (error) {
     res.status(500).send(error.message);
@@ -75,15 +82,14 @@ app.post("/login", async (req, res) => {
 // User logout
 app.post("/logout", auth, async (req, res) => {
   try {
-    const user = req.user;
-    const lastSession = user.sessions[user.sessions.length - 1];
-    if (lastSession) {
-      lastSession.logoutTime = new Date();
-      await user.save();
-    }
-    res.send("User logged out successfully");
+    // Clear user's session information
+    req.user.tokens = [];
+    await req.user.save();
+
+    res.send("Logged out successfully");
   } catch (error) {
-    res.status(500).send(error.message);
+    console.error("Error during logout:", error.message);
+    res.status(500).send("Internal server error");
   }
 });
 
