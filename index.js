@@ -82,7 +82,6 @@ app.post("/login", async (req, res) => {
 // User logout
 app.post("/logout", auth, async (req, res) => {
   try {
-    // Clear user's session information
     req.user.tokens = [];
     await req.user.save();
 
