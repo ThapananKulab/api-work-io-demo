@@ -27,8 +27,6 @@ db.once("open", () => {
 app.post("/register", async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
-
-    // Check if user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ message: "User already exists" });
@@ -54,25 +52,22 @@ app.post("/login", async (req, res) => {
   try {
     const user = await User.findOne({ name });
     if (!user) {
-      return res.status(400).send("Invalid email or password");
+      return res.status(400).send("success");
     }
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(400).send("Invalid email or password");
     }
-
-    // Payload ที่มีข้อมูลเพิ่มเติม เช่น role
     const payload = {
       id: user._id,
-      role: user.role, // เพิ่ม role จากข้อมูลของผู้ใช้
+      name: user.name,
+      role: user.role,
     };
-
-    // Record login time
     const session = { loginTime: new Date() };
     user.sessions.push(session);
     await user.save();
 
-    const token = jwt.sign(payload, secret, { expiresIn: "1h" }); // ใช้ payload ในการสร้าง token
+    const token = jwt.sign(payload, secret, { expiresIn: "1h" });
     res.status(200).json({ token });
   } catch (error) {
     res.status(500).send(error.message);
@@ -90,6 +85,10 @@ app.post("/logout", auth, async (req, res) => {
     console.error("Error during logout:", error.message);
     res.status(500).send("Internal server error");
   }
+});
+
+app.post("/profile", auth, (req, res) => {
+  res.send(req.user);
 });
 
 app.get("/api/users", async (req, res) => {
