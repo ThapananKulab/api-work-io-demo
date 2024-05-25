@@ -1,23 +1,23 @@
-const jwt = require("jsonwebtoken");
-const User = require("../models/user");
-const secret = "fullstack";
+const jwt = require('jsonwebtoken')
+const User = require('../models/user')
+const secret = 'fullstack'
 
 const auth = async (req, res, next) => {
   try {
-    const token = req.header("Authorization").replace("Bearer ", "");
-    const decoded = jwt.verify(token, secret);
-    const user = await User.findOne({ _id: decoded.id });
+    const token = req.header('Authorization').replace('Bearer ', '')
+    const decoded = jwt.verify(token, secret)
+    const user = await User.findOne({ _id: decoded.id })
 
     if (!user) {
-      throw new Error();
+      throw new Error()
     }
 
-    req.user = user;
-    req.user.role = decoded.role;
-    next();
+    req.user = user
+    req.user.role = decoded.role
+    next()
   } catch (error) {
-    res.status(401).send({ error: "Please authenticate." });
+    res.status(401).send({ error: 'Please authenticate.' })
   }
-};
+}
 
-module.exports = auth;
+module.exports = auth
