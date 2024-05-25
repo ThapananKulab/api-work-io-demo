@@ -26,7 +26,17 @@ db.once('open', () => {
 
 app.post('/register', async (req, res) => {
   try {
-    const { name, email, password, role } = req.body
+    const {
+      name,
+      email,
+      password,
+      role,
+      phone,
+      firstname,
+      lastname,
+      line,
+      linename,
+    } = req.body
     const existingUser = await User.findOne({ email })
     if (existingUser) {
       return res.status(400).json({ message: 'User already exists' })
@@ -37,6 +47,11 @@ app.post('/register', async (req, res) => {
       email,
       password: hashedPassword,
       role: role || 'พนักงาน',
+      phone,
+      firstname,
+      lastname,
+      line,
+      linename,
     })
 
     await newUser.save()
